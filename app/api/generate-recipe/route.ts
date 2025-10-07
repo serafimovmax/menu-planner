@@ -68,7 +68,7 @@ async function checkCachedRecipe(dishName: string): Promise<GeneratedRecipe | nu
 
 async function saveCachedRecipe(dishName: string, recipe: GeneratedRecipe, baseServings: number): Promise<void> {
   try {
-    const supabase = await createClient()
+    const supabase = createServiceClient()
     const normalized = normalizeRecipeName(dishName)
 
     console.log("[v0] Saving recipe to cache:", { dishName: normalized, title: recipe.title })
