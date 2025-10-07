@@ -48,23 +48,52 @@ async function checkCachedRecipe(dishName: string): Promise<GeneratedRecipe | nu
   }
 }
 
+// async function saveCachedRecipe(dishName: string, recipe: GeneratedRecipe, baseServings: number): Promise<void> {
+//   try {
+//     const supabase = await createClient()
+//     const normalized = normalizeRecipeName(dishName)
+
+//     await supabase.from("cached_recipes").insert({
+//       dish_name: normalized,
+//       title: recipe.title,
+//       description: recipe.description,
+//       ingredients: recipe.ingredients,
+//       steps: recipe.steps || [],
+//       base_servings: baseServings,
+//     })
+//   } catch (error) {
+//     console.error("[v0] Error saving cached recipe:", error)
+//   }
+// }
+
 async function saveCachedRecipe(dishName: string, recipe: GeneratedRecipe, baseServings: number): Promise<void> {
   try {
     const supabase = await createClient()
     const normalized = normalizeRecipeName(dishName)
 
-    await supabase.from("cached_recipes").insert({
-      dish_name: normalized,
-      title: recipe.title,
-      description: recipe.description,
-      ingredients: recipe.ingredients,
-      steps: recipe.steps || [],
-      base_servings: baseServings,
-    })
+    console.log("[v0] Saving recipe to cache:", { dishName: normalized, title: recipe.title })
+
+    const { error } = await supabase
+      .from("cached_recipes")
+      .insert({
+        dish_name: normalized,
+        title: recipe.title,
+        description: recipe.description,
+        ingredients: recipe.ingredients,
+        steps: recipe.steps || [],
+        base_servings: baseServings,
+      })
+
+    if (error) {
+      console.error("[v0] Supabase insert error:", error)
+    } else {
+      console.log("[v0] Recipe cached successfully:", recipe.title)
+    }
   } catch (error) {
     console.error("[v0] Error saving cached recipe:", error)
   }
 }
+
 
 async function generateRecipeWithAI(dishName: string, servings: number): Promise<GeneratedRecipe> {
   const apiUrl = process.env.AI_API_URL || "https://api.deepseek.com/chat/completions"
