@@ -28,11 +28,16 @@ function Tooltip({
   )
 }
 
-function TooltipTrigger({
-  ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {
-  return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />
+function TooltipTrigger({ className, ...props }: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {
+  return (
+    <TooltipPrimitive.Trigger
+      data-slot="tooltip-trigger"
+      className={cn('absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2', className)}
+      {...props}
+    />
+  )
 }
+
 
 function TooltipContent({
   className,
