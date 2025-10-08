@@ -238,13 +238,17 @@ export async function POST(request: Request) {
     }))
 
     return NextResponse.json({
-      success: true,
-      title: recipe.title,
-      description: recipe.description,
-      ingredients: scaledIngredients,
-      steps: recipe.steps || [],
-      servings,
-    })
+  success: true,
+  cached: !!cachedRecipe, // если у тебя есть логика кеша
+  recipe: {
+    title: recipe.title,
+    description: recipe.description,
+    ingredients: recipe.ingredients,
+    steps: recipe.steps || [],
+    category: recipe.category || null,
+    servings: servings || 2,
+  },
+})
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Неизвестная ошибка"
     console.error("[v0] Generate recipe error:", errorMessage, error)
