@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { createServiceClient } from "@/lib/supabase/server"
+import { createClient } from "@/lib/supabase/server"
 
 interface GeneratedRecipe {
   title: string
@@ -68,7 +68,7 @@ async function checkCachedRecipe(dishName: string): Promise<GeneratedRecipe | nu
 
 async function saveCachedRecipe(dishName: string, recipe: GeneratedRecipe, baseServings: number): Promise<void> {
   try {
-    const supabase = createServiceClient()
+    const supabase = await createClient()
     const normalized = normalizeRecipeName(dishName)
 
     console.log("[v0] Saving recipe to cache:", { dishName: normalized, title: recipe.title })
@@ -238,17 +238,13 @@ export async function POST(request: Request) {
     }))
 
     return NextResponse.json({
-  success: true,
-  cached: !!cachedRecipe, // если у тебя есть логика кеша
-  recipe: {
-    title: recipe.title,
-    description: recipe.description,
-    ingredients: recipe.ingredients,
-    steps: recipe.steps || [],
-    category: recipe.category || null,
-    servings: servings || 2,
-  },
-})
+      success: true,
+      title: recipe.title,
+      description: recipe.description,
+      ingredients: scaledIngredients,
+      steps: recipe.steps || [],
+      servings,
+    })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Неизвестная ошибка"
     console.error("[v0] Generate recipe error:", errorMessage, error)
