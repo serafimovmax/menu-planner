@@ -4,6 +4,7 @@ export interface Recipe {
   category: string
   description: string | null
   ingredients: Ingredient[]
+  steps: RecipeStep[]
   servings: number
   user_id: string
   created_at: string
@@ -25,6 +26,11 @@ export interface MealPlan {
   user_id: string
   created_at: string
   recipe?: Recipe
+}
+
+export interface RecipeStep {
+  id?: string
+  text: string
 }
 
 export type MealType = "breakfast" | "lunch" | "dinner"
