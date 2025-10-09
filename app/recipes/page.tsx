@@ -14,6 +14,8 @@ import { Search, MoreVertical, Eye, Pencil, Trash2 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import type { Recipe } from "@/lib/types"
+import AddRecipeDialog from "@/components/add-recipe-dialog"
+
 import {
   AlertDialog,
   AlertDialogAction,

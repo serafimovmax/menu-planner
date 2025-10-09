@@ -12,6 +12,8 @@ import { createClient } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { getWeekStart, formatWeekStart, getDayName, getShortDayName, getMealTypeName } from "@/lib/utils/date"
 import type { MealPlan, Recipe, MealType } from "@/lib/types"
+import AddRecipeDialog from "@/components/add-recipe-dialog"
+
 
 export default function PlannerPage() {
   const [currentWeek, setCurrentWeek] = useState(getWeekStart())
