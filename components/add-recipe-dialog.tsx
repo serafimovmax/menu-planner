@@ -26,58 +26,66 @@ interface AddRecipeDialogProps {
 }
 
 export function AddRecipeDialog({ onRecipeAdded }: AddRecipeDialogProps) {
-  // ─────────────── UI state ───────────────
   const [open, setOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
-
-  // ─────────────── Recipe fields ───────────────
   const [name, setName] = useState("")
   const [category, setCategory] = useState("")
   const [description, setDescription] = useState("")
   const [servings, setServings] = useState("2")
   const [generationServings, setGenerationServings] = useState("2")
-
-  // ─────────────── Ingredients & Steps ───────────────
   const [baseIngredients, setBaseIngredients] = useState<Ingredient[]>([])
   const [baseServingsCount, setBaseServingsCount] = useState(2)
   const [ingredients, setIngredients] = useState<Ingredient[]>([{ name: "", amount: "", unit: "" }])
   const [steps, setSteps] = useState<string[]>([""])
-
   const { toast } = useToast()
 
-  // ─────────────── Ingredients Logic ───────────────
-  const addIngredient = () => setIngredients([...ingredients, { name: "", amount: "", unit: "" }])
-  const removeIngredient = (index: number) => setIngredients(ingredients.filter((_, i) => i !== index))
+  const addIngredient = () => {
+    setIngredients([...ingredients, { name: "", amount: "", unit: "" }])
+  }
+
+  const removeIngredient = (index: number) => {
+    setIngredients(ingredients.filter((_, i) => i !== index))
+  }
+
   const updateIngredient = (index: number, field: keyof Ingredient, value: string) => {
     const newIngredients = [...ingredients]
     newIngredients[index][field] = value
     setIngredients(newIngredients)
   }
 
-  // ─────────────── Steps Logic ───────────────
-  const addStep = () => setSteps([...steps, ""])
-  const removeStep = (index: number) => setSteps(steps.filter((_, i) => i !== index))
+  const addStep = () => {
+    setSteps([...steps, ""])
+  }
+
+  const removeStep = (index: number) => {
+    setSteps(steps.filter((_, i) => i !== index))
+  }
+
   const updateStep = (index: number, value: string) => {
     const newSteps = [...steps]
     newSteps[index] = value
     setSteps(newSteps)
   }
 
-  // ─────────────── Scaling Ingredients ───────────────
   const scaleIngredientAmount = (amount: string, scale: number): string => {
-    if (amount.includes("по вкусу") || amount.includes("для жарки")) return amount
+    if (amount.includes("по вкусу") || amount.includes("для жарки")) {
+      return amount
+    }
+
     const numMatch = amount.match(/^(\d+\.?\d*)/)
     if (numMatch) {
       const num = Number.parseFloat(numMatch[1])
       const scaled = Math.round(num * scale * 10) / 10
       return amount.replace(numMatch[1], scaled.toString())
     }
+
     return amount
   }
 
   const handleServingsChange = (newServings: string) => {
     setGenerationServings(newServings)
+
     if (baseIngredients.length > 0) {
       const scale = Number.parseInt(newServings) / baseServingsCount
       const scaledIngredients = baseIngredients.map((ing) => ({
@@ -89,7 +97,6 @@ export function AddRecipeDialog({ onRecipeAdded }: AddRecipeDialogProps) {
     }
   }
 
-  // ─────────────── AI Recipe Generation ───────────────
   const handleGenerateRecipe = async () => {
     if (!name.trim()) {
       toast({
@@ -111,23 +118,24 @@ export function AddRecipeDialog({ onRecipeAdded }: AddRecipeDialogProps) {
       const data = await response.json()
 
       if (data.success && data.recipe) {
-        setCategory(data.recipe.category || "")
+        if (data.recipe.category) {
+          setCategory(data.recipe.category)
+        }
         setDescription(data.recipe.description || "")
         setIngredients(data.recipe.ingredients || [{ name: "", amount: "", unit: "" }])
-        setBaseIngredients(data.recipe.ingredients || [])
         setSteps(data.recipe.steps || [""])
+        setBaseIngredients(data.recipe.ingredients || [])
         setBaseServingsCount(Number.parseInt(generationServings))
         setServings(generationServings)
 
         const cacheStatus = data.cached ? " (из кэша)" : ""
         toast({
-          title: `Рецепт сгенерирован${cacheStatus}`,
+          title: `Рецепт сгенерирован!${cacheStatus}`,
           description: "Проверьте и отредактируйте при необходимости",
         })
       } else {
         setDescription("Пока нет рецепта. Заполни вручную.")
         setIngredients([{ name: "", amount: "", unit: "" }])
-        setSteps([""])
         toast({
           title: "Рецепт не найден",
           description: data.message || "Не удалось сгенерировать рецепт. Попробуйте снова.",
@@ -146,23 +154,24 @@ export function AddRecipeDialog({ onRecipeAdded }: AddRecipeDialogProps) {
     }
   }
 
-  // ─────────────── Save Recipe to Supabase ───────────────
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
+
     try {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("Пользователь не авторизован")
 
       const validIngredients = ingredients.filter((ing) => ing.name.trim())
+      const validSteps = steps.filter((s) => s.trim())
 
       const { error } = await supabase.from("recipes").insert({
         name,
         category,
         description: description || null,
         ingredients: validIngredients,
-        steps,
+        steps: validSteps,
         servings: Number.parseInt(servings),
         user_id: user.id,
       })
@@ -174,7 +183,7 @@ export function AddRecipeDialog({ onRecipeAdded }: AddRecipeDialogProps) {
         description: `${name} добавлен в ваши рецепты.`,
       })
 
-      // reset form
+      // очистка
       setName("")
       setCategory("")
       setDescription("")
@@ -198,7 +207,6 @@ export function AddRecipeDialog({ onRecipeAdded }: AddRecipeDialogProps) {
     }
   }
 
-  // ─────────────── UI Rendering ───────────────
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -227,7 +235,7 @@ export function AddRecipeDialog({ onRecipeAdded }: AddRecipeDialogProps) {
               />
             </div>
 
-            {/* Порции + Генерация */}
+            {/* Количество порций + генерация */}
             <div className="grid gap-2">
               <Label htmlFor="generation-servings">Количество персон 🍽️</Label>
               <div className="flex gap-2 items-center">
@@ -270,7 +278,7 @@ export function AddRecipeDialog({ onRecipeAdded }: AddRecipeDialogProps) {
               </Select>
             </div>
 
-            {/* Порций */}
+            {/* Порции */}
             <div className="grid gap-2">
               <Label htmlFor="servings">Порций (для сохранения)</Label>
               <Input
@@ -308,7 +316,7 @@ export function AddRecipeDialog({ onRecipeAdded }: AddRecipeDialogProps) {
                 {ingredients.map((ingredient, index) => (
                   <div key={index} className="flex gap-2">
                     <Input
-                      placeholder="Название"
+                      placeholder="Название ингредиента"
                       value={ingredient.name}
                       onChange={(e) => updateIngredient(index, "name", e.target.value)}
                       className="flex-1"
@@ -336,7 +344,7 @@ export function AddRecipeDialog({ onRecipeAdded }: AddRecipeDialogProps) {
             </div>
 
             {/* Шаги приготовления */}
-            <div className="grid gap-2">
+            <div className="grid gap-2 mt-4">
               <div className="flex items-center justify-between">
                 <Label>Шаги приготовления</Label>
                 <Button type="button" variant="outline" size="sm" onClick={addStep}>
@@ -346,7 +354,7 @@ export function AddRecipeDialog({ onRecipeAdded }: AddRecipeDialogProps) {
               </div>
               <div className="space-y-2">
                 {steps.map((step, index) => (
-                  <div key={index} className="flex gap-2 items-start">
+                  <div key={index} className="flex items-start gap-2">
                     <Textarea
                       placeholder={`Шаг ${index + 1}`}
                       value={step}
