@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Navigation } from "@/components/navigation"
-import { AddRecipeDialog } from "@/components/add-recipe-dialog"
+import AddRecipeDialog from "@/components/add-recipe-dialog"
 import { SelectRecipeDialog } from "@/components/select-recipe-dialog"
 import { MealCard } from "@/components/meal-card"
 import { Button } from "@/components/ui/button"

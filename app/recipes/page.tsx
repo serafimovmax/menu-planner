@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Navigation } from "@/components/navigation"
-import { AddRecipeDialog } from "@/components/add-recipe-dialog"
+import AddRecipeDialog from "@/components/add-recipe-dialog"
 import { RecipeDetailDialog } from "@/components/recipe-detail-dialog"
 import { EditRecipeDialog } from "@/components/edit-recipe-dialog"
 import { Button } from "@/components/ui/button"
@@ -14,7 +14,6 @@ import { Search, MoreVertical, Eye, Pencil, Trash2 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import type { Recipe } from "@/lib/types"
-import AddRecipeDialog from "@/components/add-recipe-dialog"
 
 import {
   AlertDialog,
